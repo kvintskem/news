@@ -6,6 +6,7 @@ use App\Repository\ArticleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ArticleRepository::class)
@@ -21,17 +22,24 @@ class Article
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
      */
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Tags::class, mappedBy="name")
+     * @ORM\ManyToMany(targetEntity=Tags::class, inversedBy="articles", cascade={"persist"})
      */
     private $tags;
 
     public function __construct()
     {
         $this->tags = new ArrayCollection();
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getId(): ?int
@@ -44,7 +52,7 @@ class Article
         return $this->name;
     }
 
-    public function setName(?string $name): self
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -63,7 +71,6 @@ class Article
     {
         if (!$this->tags->contains($tag)) {
             $this->tags[] = $tag;
-            $tag->addName($this);
         }
 
         return $this;
@@ -71,9 +78,7 @@ class Article
 
     public function removeTag(Tags $tag): self
     {
-        if ($this->tags->removeElement($tag)) {
-            $tag->removeName($this);
-        }
+        $this->tags->removeElement($tag);
 
         return $this;
     }

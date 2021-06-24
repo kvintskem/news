@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * @ORM\Entity(repositoryClass=TagsRepository::class)
  */
@@ -20,13 +22,26 @@ class Tags
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Article::class, inversedBy="tags")
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
      */
     private $name;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Article::class, mappedBy="tags")
+     */
+    private $articles;
+
     public function __construct()
     {
-        $this->name = new ArrayCollection();
+        $this->articles = new ArrayCollection();
+    }
+
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getId(): ?int
@@ -34,26 +49,41 @@ class Tags
         return $this->id;
     }
 
-    /**
-     * @return Collection|Article[]
-     */
-    public function getName(): Collection
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function addName(Article $name): self
+    public function setName(string $name): self
     {
-        if (!$this->name->contains($name)) {
-            $this->name[] = $name;
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Article[]
+     */
+    public function getArticles(): Collection
+    {
+        return $this->articles;
+    }
+
+    public function addArticle(Article $article): self
+    {
+        if (!$this->articles->contains($article)) {
+            $this->articles[] = $article;
+            $article->addTag($this);
         }
 
         return $this;
     }
 
-    public function removeName(Article $name): self
+    public function removeArticle(Article $article): self
     {
-        $this->name->removeElement($name);
+        if ($this->articles->removeElement($article)) {
+            $article->removeTag($this);
+        }
 
         return $this;
     }

@@ -16,6 +16,9 @@ framework:
     #fragments: true
     php_errors:
         log: true
+    property_info:
+        enabled: true
+    validation: { enable_annotations: true }
 
 when@test:
     framework:
