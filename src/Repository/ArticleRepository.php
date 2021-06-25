@@ -24,6 +24,7 @@ class ArticleRepository extends ServiceEntityRepository
 
     public function getArticle($filter)
     {
+        //@todo переписать на queryBuilder
         $rsm = new ResultSetMapping();
         $query = $this->getEntityManager()->createNativeQuery(
             'SELECT a.* FROM article a
