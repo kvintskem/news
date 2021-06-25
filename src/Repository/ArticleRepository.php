@@ -3,7 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Article;
+use App\Entity\Tags;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,32 +22,17 @@ class ArticleRepository extends ServiceEntityRepository
         parent::__construct($registry, Article::class);
     }
 
-    // /**
-    //  * @return Article[] Returns an array of Article objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function getArticle($filter)
     {
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('a.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $rsm = new ResultSetMapping();
+        $query = $this->getEntityManager()->createNativeQuery(
+            'SELECT a.* FROM article a
+join article_tags at on a.id = at.article_id
+WHERE at.tags_id IN (:ids)', $rsm
+        )
+            ->setParameter('ids', $filter);
 
-    /*
-    public function findOneBySomeField($value): ?Article
-    {
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+
+            return $query->getArrayResult();
     }
-    */
 }

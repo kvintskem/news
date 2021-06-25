@@ -27,7 +27,7 @@ class TagsController extends AbstractController
 
         $errors = $validator->validate($tags);
         if (count($errors) > 0) {
-            return $this->json((string) $errors);
+            return $this->json((string) $errors, Response::HTTP_BAD_REQUEST);
         }
 
         if (!empty($tags->getId())) {
